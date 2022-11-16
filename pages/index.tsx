@@ -1,7 +1,10 @@
+import { MainLayout } from "../components/layout";
 
 
 export default function Home() {
   return (
-    <h1>fjlskñafjsd</h1>
+    <MainLayout>
+      <h1>Cookie Master</h1>
+    </MainLayout>
   )
 }
