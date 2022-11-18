@@ -1,27 +1,36 @@
 import { useState, ChangeEvent, useEffect, FC } from 'react';
-import { Card, CardContent, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material';
+import { Button, Card, CardContent, FormControl, FormControlLabel, FormLabel, Radio, RadioGroup } from '@mui/material';
 import { MainLayout } from "../components/layout"; 
 import Cookies from "js-cookie";
 import { GetServerSideProps } from 'next';
-import { copyFile } from 'fs';
+import axios from 'axios';
 
-export default function ThemeChangerPage ( props: object ) {
+interface Props {
+    theme: string;
+    name: string;
+}
 
-    console.log({props});
+export default function ThemeChangerPage ( { theme }: Props ) {
 
-    const [currentTheme, setCurrentTheme] = useState('light')
+    const [currentTheme, setCurrentTheme] = useState( theme )
 
     const onThemeChange = ( event: ChangeEvent<HTMLInputElement> ) => {
         const selectedTheme = event.target.value;
         
         setCurrentTheme( selectedTheme );
         
-        localStorage.setItem('LS -> theme', selectedTheme);
+        localStorage.setItem('theme', selectedTheme);
         Cookies.set( 'theme', selectedTheme );
+    }
+
+    const onClick = async() => {
+        const { data } = await axios.get('/api/hello');
+        console.log({ data });
     }
 
     useEffect(() => {
       console.log('LocalStorage', localStorage.getItem('theme'));
+      console.log('Cookies', Cookies.get('theme'));
     
     }, [])
     
@@ -41,6 +50,13 @@ export default function ThemeChangerPage ( props: object ) {
                         <FormControlLabel value='custom' control={ <Radio /> } label='custom' />
                     </RadioGroup>
                 </FormControl>
+
+                <Button
+                    onClick={ onClick}
+                >
+                    Solicitud
+                </Button>
+
             </CardContent>
         </Card>
     </MainLayout>
@@ -58,12 +74,12 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const { theme = 'light', name = 'No name' } = ctx.req.cookies;
 
 
-
+    const validThemes = [ 'light', 'dark', 'custom' ];
 
 
     return {
         props: {
-            theme,
+            theme: validThemes.includes( theme ) ? theme : 'dark',
             name,
         }
     }
